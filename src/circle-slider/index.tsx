@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { CircleSliderHelper } from "./helpers/circle-slider-helper";
-import { buildPath, polarToCartesian } from "./helpers/path-generator";
+import { CircleSliderHelper } from "./circle-slider-helper";
+import { buildPath, polarToCartesian } from "./helpers";
 
 type Props = {
     value?: number;
@@ -47,29 +47,26 @@ export const CircleSlider: React.FC<Props> = ({
     tooltipColor = "#333",
     onChange,
 }) => {
-    const center = size / 2;
-    const getStepsArray = () => {
-        const stepArray = [];
-        for (let i = 0; i < countSteps; i++) {
-            stepArray.push(min + i * stepSize);
-        }
-        return stepArray;
-    };
+    const stepsArray = Array(1 + (max - min) / stepSize)
+        .fill(0)
+        .map((_, i) => min + i * stepSize);
 
-    const maxLineWidth = Math.max(circleWidth, progressWidth);
-    const radius = center - Math.max(maxLineWidth, knobRadius * 2) / 2;
-    const countSteps = 1 + (max - min) / stepSize;
-    const stepsArray = getStepsArray();
     const circleSliderHelper = new CircleSliderHelper(stepsArray, value);
+
+    const center = size / 2;
+    const radius =
+        center -
+        Math.max(Math.max(circleWidth, progressWidth), knobRadius * 2) / 2;
 
     const svgRef = useRef<SVGSVGElement>();
     const [angle, setAngle] = useState(Math.floor((value / max) * 360));
     const [step, setStep] = useState(circleSliderHelper.getCurrentStep());
     const [isMouseMove, setIsMouseMove] = useState(false);
 
+    const lastValue = useRef(value);
     useEffect(
         () => {
-            if (!isMouseMove) {
+            if (lastValue.current !== value && !isMouseMove) {
                 updateSliderFromProps(value);
             }
         },
@@ -114,19 +111,15 @@ export const CircleSlider: React.FC<Props> = ({
         const newValue = Math.round(valueFromProps / stepSize!) * stepSize!;
         circleSliderHelper.updateStepIndexFromValue(newValue);
 
-        setAngle(Math.floor((value / max) * 360));
+        let newAngle = Math.floor((value / max) * 360);
+        // prevents disappearing progress
+        if (newAngle === 360) {
+            newAngle -= 0.01;
+        }
+
+        setAngle(newAngle);
         setStep(newValue);
     };
-
-    const getPath = () =>
-        buildPath({
-            cx: center,
-            cy: center,
-            radius: radius + progressWidth / 2,
-            startAngle: 0,
-            endAngle: angle,
-            thickness: progressWidth,
-        });
 
     // mouse event handlers
     const handleMouseMove = (event: MouseEvent) => {
