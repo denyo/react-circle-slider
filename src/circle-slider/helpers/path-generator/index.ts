@@ -12,7 +12,7 @@ export function polarToCartesian(
     };
 }
 
-export function getPath({
+export function buildPath({
     cx,
     cy,
     radius,
