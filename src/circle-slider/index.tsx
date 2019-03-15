@@ -47,7 +47,7 @@ export const CircleSlider: React.FC<Props> = ({
     tooltipColor = "#333",
     onChange,
 }) => {
-    const getCenter = () => size / 2;
+    const center = size / 2;
     const getStepsArray = () => {
         const stepArray = [];
         for (let i = 0; i < countSteps; i++) {
@@ -57,7 +57,7 @@ export const CircleSlider: React.FC<Props> = ({
     };
 
     const maxLineWidth = Math.max(circleWidth, progressWidth);
-    const radius = getCenter() - Math.max(maxLineWidth, knobRadius * 2) / 2;
+    const radius = center - Math.max(maxLineWidth, knobRadius * 2) / 2;
     const countSteps = 1 + (max - min) / stepSize;
     const stepsArray = getStepsArray();
     const circleSliderHelper = new CircleSliderHelper(stepsArray, value);
@@ -118,36 +118,15 @@ export const CircleSlider: React.FC<Props> = ({
         setStep(newValue);
     };
 
-    const getEndAngle = () => {
-        let tmpAngle = Math.floor((step / max) * 360);
-        // full 360 degree circle can't be drawn
-        if (tmpAngle === 360) {
-            tmpAngle -= 0.01;
-        }
-        return tmpAngle;
-    };
-
-    const getKnobCenter = () => {
-        const centerPoint = getCenter();
-        return polarToCartesian(
-            centerPoint,
-            centerPoint,
-            radius,
-            getEndAngle(),
-        );
-    };
-
-    const getPath = () => {
-        const centerPoint = getCenter();
-        return buildPath({
-            cx: centerPoint,
-            cy: centerPoint,
+    const getPath = () =>
+        buildPath({
+            cx: center,
+            cy: center,
             radius: radius + progressWidth / 2,
             startAngle: 0,
-            endAngle: getEndAngle(),
+            endAngle: angle,
             thickness: progressWidth,
         });
-    };
 
     // mouse event handlers
     const handleMouseMove = (event: MouseEvent) => {
@@ -192,8 +171,15 @@ export const CircleSlider: React.FC<Props> = ({
     };
 
     const offset = shadow ? "5px" : "0px";
-    const center = getCenter();
-    const knobCenter = getKnobCenter();
+    const progressPath = buildPath({
+        cx: center,
+        cy: center,
+        radius: radius + progressWidth / 2,
+        startAngle: 0,
+        endAngle: angle,
+        thickness: progressWidth,
+    });
+    const knobCenter = polarToCartesian(center, center, radius, angle);
     const isAllGradientColorsAvailable = gradientColorFrom && gradientColorTo;
 
     return (
@@ -242,7 +228,7 @@ export const CircleSlider: React.FC<Props> = ({
                             : progressColor,
                         fillRule: "evenodd",
                     }}
-                    d={getPath()}
+                    d={progressPath}
                 />
                 {shadow && (
                     <filter id="dropShadow" filterUnits="userSpaceOnUse">
