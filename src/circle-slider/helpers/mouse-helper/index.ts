@@ -1,30 +1,32 @@
 export class MouseHelper {
-    private container: any;
+    private container: SVGSVGElement;
     private center!: number;
     private relativeX!: number;
     private relativeY!: number;
 
-    constructor(container: any) {
+    constructor(container: SVGSVGElement) {
         this.container = container;
-        this.setPosition({ x: 0, y: 0 });
     }
 
-    public setPosition(event: any): void {
+    public setPosition(event: MouseEvent | React.Touch): void {
         if (!this.container) {
             return;
         }
         const rectSize = this.container.getBoundingClientRect();
-        const width = rectSize.width;
-        this.center = width / 2;
+        this.center = rectSize.width / 2;
         this.relativeX = event.clientX - rectSize.left;
         this.relativeY = event.clientY - rectSize.top;
     }
 
     public getNewSliderAngle(): number {
-        const angleBetweenTwoVectors = Math.atan2(
-            this.relativeY - this.center,
-            this.relativeX - this.center,
-        );
-        return (angleBetweenTwoVectors + (3 * Math.PI) / 2) % (2 * Math.PI);
+        const x = this.relativeX - this.center;
+        const y = this.relativeY - this.center;
+        const angleBetweenTwoVectors = Math.atan2(y, x);
+
+        let angle = (angleBetweenTwoVectors * 180) / Math.PI + 90;
+        if (x < 0 && y < 0) {
+            angle += 360;
+        }
+        return angle;
     }
 }

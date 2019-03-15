@@ -1,7 +1,7 @@
 import * as React from "react";
 import { CircleSliderHelper } from "./helpers/circle-slider-helper";
 import { MouseHelper } from "./helpers/mouse-helper";
-import { pathGenerator } from "./helpers/path-generator";
+import { getPath, polarToCartesian } from "./helpers/path-generator";
 
 interface IProps {
     size?: number;
@@ -64,7 +64,7 @@ export class CircleSlider extends React.Component<IProps, IState> {
     private stepsArray: number[];
     private circleSliderHelper: CircleSliderHelper;
     private mouseHelper!: MouseHelper;
-    private svg: any;
+    private svg!: SVGSVGElement;
 
     constructor(props: IProps) {
         super(props);
@@ -92,14 +92,14 @@ export class CircleSlider extends React.Component<IProps, IState> {
 
         this.circleSliderHelper = new CircleSliderHelper(
             this.stepsArray,
-            value,
+            value!,
         );
     }
 
     public componentDidMount() {
         this.mouseHelper = new MouseHelper(this.svg);
         this.setState({
-            angle: this.circleSliderHelper.getAngle(),
+            angle: Math.floor((this.props.value! / this.props.max!) * 360),
             currentStepValue: this.circleSliderHelper.getCurrentStep(),
         });
     }
@@ -121,9 +121,10 @@ export class CircleSlider extends React.Component<IProps, IState> {
     };
 
     public updateSlider = (): void => {
-        const angle = this.mouseHelper.getNewSliderAngle();
-        if (Math.abs(angle - this.state.angle) < Math.PI) {
-            this.updateAngle(angle);
+        const newAngle = this.mouseHelper.getNewSliderAngle();
+        // prevent jumping from "< 360 to > 0" and "> 0 to < 360"
+        if (Math.abs(newAngle - this.state.angle) < 90) {
+            this.updateAngle(newAngle);
         }
     };
 
@@ -132,7 +133,7 @@ export class CircleSlider extends React.Component<IProps, IState> {
         const newValue = Math.round(valueFromProps / stepSize!) * stepSize!;
         this.circleSliderHelper.updateStepIndexFromValue(newValue);
         this.setState({
-            angle: this.circleSliderHelper.getAngle(),
+            angle: Math.floor((this.props.value! / this.props.max!) * 360),
             currentStepValue: newValue,
         });
     };
@@ -145,13 +146,25 @@ export class CircleSlider extends React.Component<IProps, IState> {
         return this.state.angle + Math.PI / 2;
     };
 
+    public getEndAngle = (): number => {
+        let angle = Math.floor(
+            (this.state.currentStepValue / this.props.max!) * 360,
+        );
+        // full 360 degree circle can't be drawn
+        if (angle === 360) {
+            angle -= 0.01;
+        }
+        return angle;
+    };
+
     public getPointPosition = (): IPoint => {
         const center = this.getCenter();
-        const angle = this.getAngle();
-        return {
-            x: center + this.radius * Math.cos(angle),
-            y: center + this.radius * Math.sin(angle),
-        };
+        return polarToCartesian(
+            center,
+            center,
+            this.radius,
+            this.getEndAngle(),
+        );
     };
 
     public getStepsArray = (min: number, stepSize: number): number[] => {
@@ -164,13 +177,17 @@ export class CircleSlider extends React.Component<IProps, IState> {
 
     public getPath = (): string => {
         const center = this.getCenter();
-        const direction = this.getAngle() < 1.5 * Math.PI ? 0 : 1;
-        const { x, y } = this.getPointPosition();
-        const path = pathGenerator(center, this.radius, direction, x, y);
-        return path;
+        return getPath({
+            cx: center,
+            cy: center,
+            radius: this.radius + this.props.progressWidth! / 2,
+            startAngle: 0,
+            endAngle: this.getEndAngle(),
+            thickness: this.props.progressWidth!,
+        });
     };
 
-    public handleMouseMove = (event: Event): void => {
+    public handleMouseMove = (event: MouseEvent): void => {
         event.preventDefault();
         this.setState({
             isMouseMove: true,
@@ -179,7 +196,7 @@ export class CircleSlider extends React.Component<IProps, IState> {
         this.updateSlider();
     };
 
-    public handleMouseUp = (event: Event): void => {
+    public handleMouseUp = (event: MouseEvent): void => {
         event.preventDefault();
         this.setState({
             isMouseMove: false,
@@ -195,12 +212,13 @@ export class CircleSlider extends React.Component<IProps, IState> {
             window.addEventListener("mouseup", this.handleMouseUp);
         }
     };
+
     public handleTouchMove: any = (
         event: React.TouchEvent<SVGSVGElement>,
     ): void => {
         const targetTouches = event.targetTouches;
         const countTouches = targetTouches.length;
-        const currentTouch: React.Touch = targetTouches.item(countTouches - 1)!;
+        const currentTouch = targetTouches.item(countTouches - 1)!;
         this.mouseHelper.setPosition(currentTouch);
         this.updateSlider();
     };
@@ -228,7 +246,6 @@ export class CircleSlider extends React.Component<IProps, IState> {
             disabled,
             shadow,
             circleWidth,
-            progressWidth,
             knobRadius,
             showTooltip,
             showPercentage,
@@ -243,7 +260,7 @@ export class CircleSlider extends React.Component<IProps, IState> {
             gradientColorFrom && gradientColorTo;
         return (
             <svg
-                ref={svg => (this.svg = svg)}
+                ref={svg => (this.svg = svg!)}
                 width={`${size}px`}
                 height={`${size}px`}
                 viewBox={`0 0 ${size} ${size}`}
@@ -287,12 +304,11 @@ export class CircleSlider extends React.Component<IProps, IState> {
                     )}
                     <path
                         style={{
-                            strokeLinecap: "round",
-                            strokeWidth: progressWidth!,
-                            stroke: isAllGradientColorsAvailable
+                            stroke: "none",
+                            fill: isAllGradientColorsAvailable
                                 ? "url(#gradient)"
                                 : progressColor,
-                            fill: "none",
+                            fillRule: "evenodd",
                         }}
                         d={this.getPath()}
                     />
