@@ -157,6 +157,7 @@ export const CircleSlider: React.FC<Props> = ({
             style={{
                 padding: offset,
                 boxSizing: "border-box",
+                touchAction: "none",
             }}
         >
             <g>
