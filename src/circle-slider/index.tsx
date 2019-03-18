@@ -84,27 +84,35 @@ export const CircleSlider: React.FC<Props> = ({
         }
     };
 
-    let prevNewAngle = angle; // necessary since functional component
+    const prevX = useRef<number>(); // necessary since functional component
     const updateSliderFromEvent = (event: MouseEvent | React.Touch) => {
         const rectSize = svgRef.current.getBoundingClientRect();
         const rectCenter = rectSize.width / 2;
-        const relativeX = event.clientX - rectSize.left;
-        const relativeY = event.clientY - rectSize.top;
 
-        const x = relativeX - rectCenter;
-        const y = relativeY - rectCenter;
+        const x = event.clientX - rectSize.left - rectCenter;
+        const y = event.clientY - rectSize.top - rectCenter;
         const angleBetweenTwoVectors = Math.atan2(y, x);
 
         let newAngle = (angleBetweenTwoVectors * 180) / Math.PI + 90;
+
         if (x < 0 && y < 0) {
             newAngle += 360;
         }
 
         // prevent jumping from "< 360 to > 0" and "> 0 to < 360"
-        if (Math.abs(newAngle - prevNewAngle) < 90) {
-            updateAngle(newAngle);
-            prevNewAngle = newAngle;
+        if (y < 0) {
+            if (prevX.current < 0 && x > 0) {
+                newAngle = 360 - 0.01; // can't go over 360
+            } else if (prevX.current > 0 && x < 0) {
+                newAngle = 0.01; // can't go lower than 0
+            } else {
+                prevX.current = x;
+            }
+        } else {
+            prevX.current = x;
         }
+
+        updateAngle(newAngle);
     };
 
     const updateSliderFromProps = (valueFromProps: number) => {
