@@ -29,7 +29,7 @@ const THRESHOLD = 0.01;
 export const CircleSlider: React.FC<Props> = ({
     value = 0,
     size = 180,
-    stepSize = 2,
+    stepSize = 1,
     min = 0,
     max = 100,
     circleWidth = 5,
@@ -51,11 +51,15 @@ export const CircleSlider: React.FC<Props> = ({
     const center = size / 2;
     const radius = center - Math.max(circleWidth, progressWidth, knobRadius * 2) / 2;
 
+    // takes care of min, max and stepSize
+    const formatValue = (input?: number) => Math.round((input || (value < min ? min : value > max ? max : value)) / stepSize) * stepSize;
+
     const valueToAngle = () => {
-        const newAngle = Math.floor((value / (max - min)) * 360);
+        const newAngle = Math.round(((formatValue() - min) / (max - min)) * 360);
         return newAngle === 360 ? newAngle - THRESHOLD : newAngle % 360;
     };
-    const angleToValue = (newAngle: number) => Math.floor(newAngle / (360 / ((max - min) / stepSize) / stepSize));
+
+    const angleToValue = (newAngle: number) => formatValue(newAngle / (360 / (max - min))) + min;
 
     const svgRef = useRef<SVGSVGElement>();
     const prevX = useRef<number>(); // necessary since functional component
@@ -68,7 +72,7 @@ export const CircleSlider: React.FC<Props> = ({
         const y = event.clientY - rectSize.top - rectCenter;
         const angleBetweenTwoVectors = Math.atan2(y, x);
 
-        let newAngle = Math.floor((angleBetweenTwoVectors * 180) / Math.PI + 90);
+        let newAngle = Math.round((angleBetweenTwoVectors * 180) / Math.PI) + 90;
 
         if (x < 0 && y < 0) {
             newAngle += 360;
@@ -87,9 +91,7 @@ export const CircleSlider: React.FC<Props> = ({
             prevX.current = x;
         }
 
-        if (onChange) {
-            onChange(angleToValue(newAngle));
-        }
+        onChange(angleToValue(newAngle));
     };
 
     // mouse event handlers
@@ -216,7 +218,7 @@ export const CircleSlider: React.FC<Props> = ({
                         fontFamily="Arial"
                         fill={tooltipColor}
                     >
-                        {value}
+                        {formatValue()}
                         {showPercentage && "%"}
                     </text>
                 )}
