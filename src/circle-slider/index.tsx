@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { CircleSliderHelper } from "./circle-slider-helper";
 import { buildPath, polarToCartesian } from "./helpers";
 
 type Props = {
@@ -41,48 +40,33 @@ export const CircleSlider: React.FC<Props> = ({
     knobRadius = 20,
     disabled = false,
     shadow = true,
-    showTooltip = false,
+    showTooltip = true,
     showPercentage = false,
     tooltipSize = 32,
     tooltipColor = "#333",
     onChange,
 }) => {
-    const stepsArray = Array(1 + (max - min) / stepSize)
-        .fill(0)
-        .map((_, i) => min + i * stepSize);
-
-    const circleSliderHelper = new CircleSliderHelper(stepsArray, value);
-
     const center = size / 2;
     const radius =
-        center -
-        Math.max(Math.max(circleWidth, progressWidth), knobRadius * 2) / 2;
+        center - Math.max(circleWidth, progressWidth, knobRadius * 2) / 2;
+
+    const valueToStep = () => Math.round(value / stepSize) * stepSize;
+    const angleToValue = (newAngle: number) =>
+        Math.round(newAngle / (360 / ((max - min) / stepSize) / stepSize));
 
     const svgRef = useRef<SVGSVGElement>();
     const [angle, setAngle] = useState(Math.floor((value / max) * 360));
-    const [step, setStep] = useState(circleSliderHelper.getCurrentStep());
     const [isMouseMove, setIsMouseMove] = useState(false);
 
     const lastValue = useRef(value);
     useEffect(
         () => {
             if (lastValue.current !== value && !isMouseMove) {
-                updateSliderFromProps(value);
+                updateSliderFromProps();
             }
         },
         [value, isMouseMove],
     );
-
-    const updateAngle = (newAngle: number) => {
-        circleSliderHelper.updateStepIndexFromAngle(newAngle);
-        const newStep = circleSliderHelper.getCurrentStep();
-        setAngle(newAngle);
-        setStep(newStep);
-
-        if (onChange) {
-            onChange(newStep);
-        }
-    };
 
     const prevX = useRef<number>(); // necessary since functional component
     const updateSliderFromEvent = (event: MouseEvent | React.Touch) => {
@@ -112,13 +96,13 @@ export const CircleSlider: React.FC<Props> = ({
             prevX.current = x;
         }
 
-        updateAngle(newAngle);
+        setAngle(newAngle);
+        if (onChange) {
+            onChange(angleToValue(newAngle));
+        }
     };
 
-    const updateSliderFromProps = (valueFromProps: number) => {
-        const newValue = Math.round(valueFromProps / stepSize!) * stepSize!;
-        circleSliderHelper.updateStepIndexFromValue(newValue);
-
+    const updateSliderFromProps = () => {
         let newAngle = Math.floor((value / max) * 360);
         // prevents disappearing progress
         if (newAngle === 360) {
@@ -126,7 +110,6 @@ export const CircleSlider: React.FC<Props> = ({
         }
 
         setAngle(newAngle);
-        setStep(newValue);
     };
 
     // mouse event handlers
@@ -263,7 +246,8 @@ export const CircleSlider: React.FC<Props> = ({
                         fontFamily="Arial"
                         fill={tooltipColor}
                     >
-                        {showPercentage ? `${step}%` : step}
+                        {valueToStep()}
+                        {showPercentage && "%"}
                     </text>
                 )}
             </g>
