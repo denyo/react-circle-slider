@@ -64,7 +64,7 @@ export const CircleSlider: React.FC<Props> = ({
     const svgRef = useRef<SVGSVGElement>();
     const prevX = useRef<number>(); // necessary since functional component
 
-    const updateSliderFromEvent = (event: MouseEvent | React.Touch) => {
+    const updateSliderFromEvent = (event: MouseEvent | Touch) => {
         const rectSize = svgRef.current.getBoundingClientRect();
         const rectCenter = rectSize.width / 2;
 
@@ -95,43 +95,47 @@ export const CircleSlider: React.FC<Props> = ({
     };
 
     // mouse event handlers
+    // --------------------
+    // react event
+    const handleMouseDown = (event: React.MouseEvent) => {
+        event.preventDefault();
+        svgRef.current.addEventListener("mousemove", handleMouseMove);
+        svgRef.current.addEventListener("mouseup", handleMouseUp);
+    };
+
+    // regular dom event
     const handleMouseMove = (event: MouseEvent) => {
         event.preventDefault();
         updateSliderFromEvent(event);
     };
 
+    // regular dom event
     const handleMouseUp = (event: MouseEvent) => {
         event.preventDefault();
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
-    };
-
-    const handleMouseDown = (event: React.MouseEvent<SVGSVGElement>) => {
-        if (!disabled) {
-            event.preventDefault();
-            window.addEventListener("mousemove", handleMouseMove);
-            window.addEventListener("mouseup", handleMouseUp);
-        }
+        svgRef.current.removeEventListener("mousemove", handleMouseMove);
+        svgRef.current.removeEventListener("mouseup", handleMouseUp);
     };
 
     // touch event handlers
-    const handleTouchMove: any = (event: React.TouchEvent<SVGSVGElement>) => {
+    // --------------------
+    // react event
+    const handleTouchStart = () => {
+        svgRef.current.addEventListener("touchmove", handleTouchMove);
+        svgRef.current.addEventListener("touchend", handleTouchUp);
+    };
+
+    // regular dom event
+    const handleTouchMove = (event: TouchEvent) => {
         const targetTouches = event.targetTouches;
         const countTouches = targetTouches.length;
         const currentTouch = targetTouches.item(countTouches - 1);
         updateSliderFromEvent(currentTouch);
     };
 
+    // regular dom event
     const handleTouchUp = () => {
-        window.removeEventListener("touchmove", handleTouchMove);
-        window.removeEventListener("touchend", handleTouchUp);
-    };
-
-    const handleTouchStart = () => {
-        if (!disabled) {
-            window.addEventListener("touchmove", handleTouchMove);
-            window.addEventListener("touchend", handleTouchUp);
-        }
+        svgRef.current.removeEventListener("touchmove", handleTouchMove);
+        svgRef.current.removeEventListener("touchend", handleTouchUp);
     };
 
     const offset = shadow ? "5px" : "0px";
@@ -152,8 +156,8 @@ export const CircleSlider: React.FC<Props> = ({
             width={size}
             height={size}
             viewBox={`0 0 ${size} ${size}`}
-            onMouseDown={handleMouseDown}
-            onTouchStart={handleTouchStart}
+            onMouseDown={disabled ? undefined : handleMouseDown}
+            onTouchStart={disabled ? undefined : handleTouchStart}
             style={{
                 padding: offset,
                 boxSizing: "border-box",
