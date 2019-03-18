@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import { buildPath, polarToCartesian } from "./helpers";
 
 type Props = {
@@ -24,6 +24,8 @@ type Props = {
     onChange: (value?: number) => void;
 };
 
+const THRESHOLD = 0.01;
+
 export const CircleSlider: React.FC<Props> = ({
     value = 0,
     size = 180,
@@ -47,32 +49,17 @@ export const CircleSlider: React.FC<Props> = ({
     onChange,
 }) => {
     const center = size / 2;
-    const radius =
-        center - Math.max(circleWidth, progressWidth, knobRadius * 2) / 2;
+    const radius = center - Math.max(circleWidth, progressWidth, knobRadius * 2) / 2;
 
     const valueToAngle = () => {
-        const newAngle = Math.floor((value / (max - min)) * 360) % 360;
-        return newAngle === 360 ? newAngle - 0.01 : newAngle;
+        const newAngle = Math.floor((value / (max - min)) * 360);
+        return newAngle === 360 ? newAngle - THRESHOLD : newAngle % 360;
     };
-    const angleToValue = (newAngle: number) =>
-        Math.floor(newAngle / (360 / ((max - min) / stepSize) / stepSize));
+    const angleToValue = (newAngle: number) => Math.floor(newAngle / (360 / ((max - min) / stepSize) / stepSize));
 
     const svgRef = useRef<SVGSVGElement>();
-    const [angle, setAngle] = useState(valueToAngle());
-    const [isMouseMove, setIsMouseMove] = useState(false);
-
-    const lastValue = useRef(value);
-    useEffect(
-        () => {
-            if (lastValue.current !== value && !isMouseMove) {
-                setAngle(valueToAngle());
-                lastValue.current = value;
-            }
-        },
-        [value, isMouseMove],
-    );
-
     const prevX = useRef<number>(); // necessary since functional component
+
     const updateSliderFromEvent = (event: MouseEvent | React.Touch) => {
         const rectSize = svgRef.current.getBoundingClientRect();
         const rectCenter = rectSize.width / 2;
@@ -81,9 +68,7 @@ export const CircleSlider: React.FC<Props> = ({
         const y = event.clientY - rectSize.top - rectCenter;
         const angleBetweenTwoVectors = Math.atan2(y, x);
 
-        let newAngle = Math.floor(
-            (angleBetweenTwoVectors * 180) / Math.PI + 90,
-        );
+        let newAngle = Math.floor((angleBetweenTwoVectors * 180) / Math.PI + 90);
 
         if (x < 0 && y < 0) {
             newAngle += 360;
@@ -92,9 +77,9 @@ export const CircleSlider: React.FC<Props> = ({
         // prevent jumping from "< 360 to > 0" and "> 0 to < 360"
         if (y < 0) {
             if (prevX.current < 0 && x > 0) {
-                newAngle = 360 - 0.01; // can't go over 360
+                newAngle = 360 - THRESHOLD; // can't go over 360
             } else if (prevX.current > 0 && x < 0) {
-                newAngle = 0.01; // can't go lower than 0
+                newAngle = THRESHOLD; // can't go lower than 0
             } else {
                 prevX.current = x;
             }
@@ -102,7 +87,6 @@ export const CircleSlider: React.FC<Props> = ({
             prevX.current = x;
         }
 
-        setAngle(newAngle);
         if (onChange) {
             onChange(angleToValue(newAngle));
         }
@@ -111,13 +95,11 @@ export const CircleSlider: React.FC<Props> = ({
     // mouse event handlers
     const handleMouseMove = (event: MouseEvent) => {
         event.preventDefault();
-        setIsMouseMove(true);
         updateSliderFromEvent(event);
     };
 
     const handleMouseUp = (event: MouseEvent) => {
         event.preventDefault();
-        setIsMouseMove(false);
         window.removeEventListener("mousemove", handleMouseMove);
         window.removeEventListener("mouseup", handleMouseUp);
     };
@@ -156,10 +138,10 @@ export const CircleSlider: React.FC<Props> = ({
         cy: center,
         radius: radius + progressWidth / 2,
         startAngle: 0,
-        endAngle: angle,
+        endAngle: valueToAngle(),
         thickness: progressWidth,
     });
-    const knobCenter = polarToCartesian(center, center, radius, angle);
+    const knobCenter = polarToCartesian(center, center, radius, valueToAngle());
     const isAllGradientColorsAvailable = gradientColorFrom && gradientColorTo;
 
     return (
@@ -188,13 +170,7 @@ export const CircleSlider: React.FC<Props> = ({
                 />
                 {isAllGradientColorsAvailable && (
                     <defs>
-                        <linearGradient
-                            id="gradient"
-                            x1="0"
-                            x2="0"
-                            y1="0"
-                            y2="1"
-                        >
+                        <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
                             <stop offset="0%" stopColor={gradientColorFrom} />
                             <stop offset="100%" stopColor={gradientColorTo} />
                         </linearGradient>
@@ -203,9 +179,7 @@ export const CircleSlider: React.FC<Props> = ({
                 <path
                     style={{
                         stroke: "none",
-                        fill: isAllGradientColorsAvailable
-                            ? "url(#gradient)"
-                            : progressColor,
+                        fill: isAllGradientColorsAvailable ? "url(#gradient)" : progressColor,
                         fillRule: "evenodd",
                     }}
                     d={progressPath}
