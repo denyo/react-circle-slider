@@ -27,7 +27,7 @@ type Props = {
 export const CircleSlider: React.FC<Props> = ({
     value = 0,
     size = 180,
-    stepSize = 1,
+    stepSize = 2,
     min = 0,
     max = 100,
     circleWidth = 5,
@@ -50,19 +50,23 @@ export const CircleSlider: React.FC<Props> = ({
     const radius =
         center - Math.max(circleWidth, progressWidth, knobRadius * 2) / 2;
 
-    const valueToStep = () => Math.round(value / stepSize) * stepSize;
+    const valueToAngle = () => {
+        const newAngle = Math.floor((value / (max - min)) * 360) % 360;
+        return newAngle === 360 ? newAngle - 0.01 : newAngle;
+    };
     const angleToValue = (newAngle: number) =>
-        Math.round(newAngle / (360 / ((max - min) / stepSize) / stepSize));
+        Math.floor(newAngle / (360 / ((max - min) / stepSize) / stepSize));
 
     const svgRef = useRef<SVGSVGElement>();
-    const [angle, setAngle] = useState(Math.floor((value / max) * 360));
+    const [angle, setAngle] = useState(valueToAngle());
     const [isMouseMove, setIsMouseMove] = useState(false);
 
     const lastValue = useRef(value);
     useEffect(
         () => {
             if (lastValue.current !== value && !isMouseMove) {
-                updateSliderFromProps();
+                setAngle(valueToAngle());
+                lastValue.current = value;
             }
         },
         [value, isMouseMove],
@@ -77,7 +81,9 @@ export const CircleSlider: React.FC<Props> = ({
         const y = event.clientY - rectSize.top - rectCenter;
         const angleBetweenTwoVectors = Math.atan2(y, x);
 
-        let newAngle = (angleBetweenTwoVectors * 180) / Math.PI + 90;
+        let newAngle = Math.floor(
+            (angleBetweenTwoVectors * 180) / Math.PI + 90,
+        );
 
         if (x < 0 && y < 0) {
             newAngle += 360;
@@ -100,16 +106,6 @@ export const CircleSlider: React.FC<Props> = ({
         if (onChange) {
             onChange(angleToValue(newAngle));
         }
-    };
-
-    const updateSliderFromProps = () => {
-        let newAngle = Math.floor((value / max) * 360);
-        // prevents disappearing progress
-        if (newAngle === 360) {
-            newAngle -= 0.01;
-        }
-
-        setAngle(newAngle);
     };
 
     // mouse event handlers
@@ -246,7 +242,7 @@ export const CircleSlider: React.FC<Props> = ({
                         fontFamily="Arial"
                         fill={tooltipColor}
                     >
-                        {valueToStep()}
+                        {value}
                         {showPercentage && "%"}
                     </text>
                 )}
