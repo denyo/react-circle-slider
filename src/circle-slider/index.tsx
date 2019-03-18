@@ -48,9 +48,6 @@ export const CircleSlider: React.FC<Props> = ({
     tooltipColor = "#333",
     onChange,
 }) => {
-    const center = size / 2;
-    const radius = center - Math.max(circleWidth, progressWidth, knobRadius * 2) / 2;
-
     // takes care of min, max and stepSize
     const formatValue = (input?: number) => Math.round((input || (value < min ? min : value > max ? max : value)) / stepSize) * stepSize;
 
@@ -139,6 +136,8 @@ export const CircleSlider: React.FC<Props> = ({
     };
 
     const offset = shadow ? "5px" : "0px";
+    const center = size / 2;
+    const radius = center - Math.max(circleWidth, progressWidth, knobRadius * 2) / 2;
     const progressPath = buildPath({
         cx: center,
         cy: center,
