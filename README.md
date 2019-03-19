@@ -45,7 +45,7 @@ Run linter
 
 Start tests followed by jest
 
-### `npm run test`
+### `npm test`
 
 ## Usage
 

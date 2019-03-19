@@ -1,9 +1,6 @@
-import { configure, mount, shallow } from "enzyme";
-import Adapter from "enzyme-adapter-react-16";
+import { mount, shallow } from "enzyme";
 import React from "react";
 import { CircleSlider } from "../circle-slider";
-
-configure({ adapter: new Adapter() });
 
 describe("circle slider", () => {
     const props = {
