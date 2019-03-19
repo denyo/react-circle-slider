@@ -124,8 +124,7 @@ export const CircleSlider: React.FC<Props> = ({
     // regular dom event
     const handleTouchMove = (event: TouchEvent) => {
         const targetTouches = event.targetTouches;
-        const countTouches = targetTouches.length;
-        const currentTouch = targetTouches.item(countTouches - 1);
+        const currentTouch = targetTouches.item(targetTouches.length - 1);
         updateSliderFromEvent(currentTouch);
     };
 
