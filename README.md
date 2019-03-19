@@ -26,7 +26,6 @@ Install `react-circle-slider` using npm.
 
 ### `npm install --save react-circle-slider`
 
-
 You can also test the components locally by cloning this repo and doing the following steps:
 
 ## 🔲 NPM-scripts
@@ -74,9 +73,7 @@ export class App extends React.Component {
 
     render() {
         const { value } = this.state;
-        return (
-            <CircleSlider value={value} onChange={this.handleChange} />
-        );
+        return <CircleSlider value={value} onChange={this.handleChange} />;
     }
 }
 
@@ -103,22 +100,23 @@ ReactDOM.render(<App />, document.getElementById("root"));
 | disabled          | Boolean  | false     | disabled status                                                |
 | shadow            | Boolean  | true      | shadow on knob                                                 |
 | showTooltip       | Boolean  | false     | tooltip                                                        |
-| showPercentage    | Boolean  | false     | percentage on tooltip                                          |
+| valuePrefix       | String   | NOOP      | prefix of value within tooltip                                 |
+| valueSuffix       | String   | NOOP      | suffix of value within tooltip                                 |
 | tooltipSize       | Number   | 32        | size of tooltip                                                |
 | tooltipColor      | String   | `#333`    | color of tooltip                                               |
 | onChange          | Function | NOOP      | when slider is moved, `onChange` is triggered.                 |
 
 ## 💡 Todo
 
-- [ ] Keyboard support
-- [ ] Mouse scroll support
-- [ ] Accessibility 
+-   [ ] Keyboard support
+-   [ ] Mouse scroll support
+-   [ ] Accessibility
 
 ## 💻 Contributing
 
-- For bugs and feature requests, please create an issue
-- Lint and test your code
-- Pull requests and ⭐ stars are always welcome
+-   For bugs and feature requests, please create an issue
+-   Lint and test your code
+-   Pull requests and ⭐ stars are always welcome
 
 ## License
 

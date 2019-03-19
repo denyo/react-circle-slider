@@ -18,10 +18,12 @@ type Props = {
     disabled?: boolean;
     shadow?: boolean;
     showTooltip?: boolean;
-    showPercentage?: boolean;
+    valuePrefix?: string;
+    valueSuffix?: string;
     tooltipSize?: number;
     tooltipColor?: string;
     onChange: (value?: number) => void;
+    className?: string;
 };
 
 const THRESHOLD = 0.01;
@@ -43,10 +45,12 @@ export const CircleSlider: React.FC<Props> = ({
     disabled = false,
     shadow = true,
     showTooltip = false,
-    showPercentage = false,
+    valuePrefix = "",
+    valueSuffix = "",
     tooltipSize = 32,
     tooltipColor = "#333",
     onChange,
+    className,
 }) => {
     // takes care of min, max and stepSize
     const formatValue = (input?: number) => Math.round((input || (value < min ? min : value > max ? max : value)) / stepSize) * stepSize;
@@ -151,6 +155,7 @@ export const CircleSlider: React.FC<Props> = ({
     return (
         <svg
             ref={svgRef}
+            className={className}
             width={size}
             height={size}
             viewBox={`0 0 ${size} ${size}`}
@@ -221,8 +226,9 @@ export const CircleSlider: React.FC<Props> = ({
                         fontFamily="Arial"
                         fill={tooltipColor}
                     >
+                        {valuePrefix}
                         {formatValue()}
-                        {showPercentage && "%"}
+                        {valueSuffix}
                     </text>
                 )}
             </g>
