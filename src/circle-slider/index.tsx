@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { MutableRefObject, RefObject, useRef } from "react";
 import { buildPath, polarToCartesian } from "./helpers";
 
 type Props = {
@@ -28,7 +28,7 @@ type Props = {
 
 const THRESHOLD = 0.01;
 
-export const CircleSlider: React.FC<Props> = ({
+const CircleSlider: React.FC<Props> = ({
     value = 0,
     size = 180,
     stepSize = 1,
@@ -62,11 +62,11 @@ export const CircleSlider: React.FC<Props> = ({
 
     const angleToValue = (newAngle: number) => formatValue(newAngle / (360 / (max - min))) + min;
 
-    const svgRef = useRef<SVGSVGElement>();
-    const prevX = useRef<number>(); // necessary since functional component
+    const svgRef = useRef<SVGSVGElement>() as RefObject<SVGSVGElement>;
+    const prevX = useRef<number>() as MutableRefObject<number>; // necessary since functional component
 
     const updateSliderFromEvent = (event: MouseEvent | Touch) => {
-        const rectSize = svgRef.current.getBoundingClientRect();
+        const rectSize = svgRef.current!.getBoundingClientRect();
         const rectCenter = rectSize.width / 2;
 
         const x = event.clientX - rectSize.left - rectCenter;
@@ -100,8 +100,8 @@ export const CircleSlider: React.FC<Props> = ({
     // react event
     const handleMouseDown = (event: React.MouseEvent) => {
         event.preventDefault();
-        svgRef.current.addEventListener("mousemove", handleMouseMove);
-        svgRef.current.addEventListener("mouseup", handleMouseUp);
+        svgRef.current!.addEventListener("mousemove", handleMouseMove);
+        svgRef.current!.addEventListener("mouseup", handleMouseUp);
     };
 
     // regular dom event
@@ -113,29 +113,31 @@ export const CircleSlider: React.FC<Props> = ({
     // regular dom event
     const handleMouseUp = (event: MouseEvent) => {
         event.preventDefault();
-        svgRef.current.removeEventListener("mousemove", handleMouseMove);
-        svgRef.current.removeEventListener("mouseup", handleMouseUp);
+        svgRef.current!.removeEventListener("mousemove", handleMouseMove);
+        svgRef.current!.removeEventListener("mouseup", handleMouseUp);
     };
 
     // touch event handlers
     // --------------------
     // react event
     const handleTouchStart = () => {
-        svgRef.current.addEventListener("touchmove", handleTouchMove);
-        svgRef.current.addEventListener("touchend", handleTouchUp);
+        svgRef.current!.addEventListener("touchmove", handleTouchMove);
+        svgRef.current!.addEventListener("touchend", handleTouchUp);
     };
 
     // regular dom event
     const handleTouchMove = (event: TouchEvent) => {
         const targetTouches = event.targetTouches;
         const currentTouch = targetTouches.item(targetTouches.length - 1);
-        updateSliderFromEvent(currentTouch);
+        if (currentTouch) {
+            updateSliderFromEvent(currentTouch);
+        }
     };
 
     // regular dom event
     const handleTouchUp = () => {
-        svgRef.current.removeEventListener("touchmove", handleTouchMove);
-        svgRef.current.removeEventListener("touchend", handleTouchUp);
+        svgRef.current!.removeEventListener("touchmove", handleTouchMove);
+        svgRef.current!.removeEventListener("touchend", handleTouchUp);
     };
 
     const offset = shadow ? "5px" : "0px";
@@ -162,8 +164,8 @@ export const CircleSlider: React.FC<Props> = ({
             onMouseDown={disabled ? undefined : handleMouseDown}
             onTouchStart={disabled ? undefined : handleTouchStart}
             style={{
-                padding: offset,
                 boxSizing: "border-box",
+                padding: offset,
                 touchAction: "none",
             }}
         >
@@ -188,9 +190,9 @@ export const CircleSlider: React.FC<Props> = ({
                 )}
                 <path
                     style={{
-                        stroke: "none",
                         fill: isAllGradientColorsAvailable ? "url(#gradient)" : progressColor,
                         fillRule: "evenodd",
+                        stroke: "none",
                     }}
                     d={progressPath}
                 />
@@ -209,8 +211,8 @@ export const CircleSlider: React.FC<Props> = ({
                 )}
                 <circle
                     style={{
-                        fill: knobColor,
                         cursor: disabled ? "not-allowed" : "pointer",
+                        fill: knobColor,
                     }}
                     filter={shadow ? "url(#dropShadow)" : "none"}
                     r={knobRadius}
@@ -235,3 +237,5 @@ export const CircleSlider: React.FC<Props> = ({
         </svg>
     );
 };
+
+export default CircleSlider;

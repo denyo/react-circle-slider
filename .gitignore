@@ -7,6 +7,7 @@
 /dist/
 /build/
 .cache
+.rpt2_cache/
 
 # Development stuff
 node_modules

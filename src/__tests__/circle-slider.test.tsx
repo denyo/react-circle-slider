@@ -1,6 +1,6 @@
 import { mount, shallow } from "enzyme";
 import React from "react";
-import { CircleSlider } from "../circle-slider";
+import CircleSlider from "../circle-slider";
 
 describe("circle slider", () => {
     const props = {
