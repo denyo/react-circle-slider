@@ -1,6 +1,9 @@
-import * as React from "react";
+import { configure, mount, shallow } from "enzyme";
+import Adapter from "enzyme-adapter-react-16";
+import React from "react";
 import { CircleSlider } from "../circle-slider";
-import { shallow, mount } from "enzyme";
+
+configure({ adapter: new Adapter() });
 
 describe("circle slider", () => {
     const props = {
@@ -19,61 +22,47 @@ describe("circle slider", () => {
     };
 
     it("circle slider should render a svg", () => {
-        const circleSlider = shallow(<CircleSlider {...props} />);
+        const wrapper = shallow(<CircleSlider {...props} />);
 
-        expect(circleSlider.find("svg")).toHaveLength(1);
+        expect(wrapper.find("svg")).toHaveLength(1);
     });
 
     it("circle slider should render with props", () => {
-        const circleSlider = mount(<CircleSlider {...props} />);
+        const wrapper = mount(<CircleSlider {...props} />);
 
-        expect(circleSlider.props().circleColor).toEqual("#EDEDED");
-        expect(circleSlider.props().value).toEqual(0);
-        expect(circleSlider.props().progressColor).toEqual("#ADA1FB");
-        expect(circleSlider.props().knobColor).toEqual("#ADA1FB");
-        expect(circleSlider.props().circleWidthInit).toEqual(9);
-        expect(circleSlider.props().progressWidthInit).toEqual(7);
-        expect(circleSlider.props().knobRadiusInit).toEqual(6);
-        expect(circleSlider.props().stepSize).toEqual(1);
-        expect(circleSlider.props().min).toEqual(0);
-        expect(circleSlider.props().max).toEqual(100);
+        expect(wrapper.props().circleColor).toEqual("#EDEDED");
+        expect(wrapper.props().value).toEqual(0);
+        expect(wrapper.props().progressColor).toEqual("#ADA1FB");
+        expect(wrapper.props().knobColor).toEqual("#ADA1FB");
+        expect(wrapper.props().circleWidthInit).toEqual(9);
+        expect(wrapper.props().progressWidthInit).toEqual(7);
+        expect(wrapper.props().knobRadiusInit).toEqual(6);
+        expect(wrapper.props().stepSize).toEqual(1);
+        expect(wrapper.props().min).toEqual(0);
+        expect(wrapper.props().max).toEqual(100);
     });
 
-    it("circle slider should call onChange", () => {
-        const circleSlider = shallow(<CircleSlider {...this.props} />);
-        (circleSlider.instance() as any).updateAngle();
+    it("circle slider should call onChange on mousemove", () => {
+        const wrapper = mount(<CircleSlider {...props} />);
+        const simulateDrag = (eventOpts: { clientX: number; clientY: number }) => {
+            wrapper.simulate("mousedown", {
+                preventDefault: () => {},
+            });
+            wrapper.getDOMNode().dispatchEvent(new MouseEvent("mousemove", eventOpts));
+            wrapper.simulate("mouseup", {
+                preventDefault: () => {},
+            });
+        };
 
-        expect(props.onChange).toHaveBeenCalled;
-    });
+        simulateDrag({ clientX: 10, clientY: 10 });
+        expect(props.onChange).toHaveBeenCalledTimes(1);
 
-    it("circle slider should call onChange", () => {
-        const circleSlider = shallow(<CircleSlider {...this.props} />);
-        (circleSlider.instance() as any).updateAngle();
-
-        expect(props.onChange).toHaveBeenCalled;
-    });
-
-    it("circle slider should call mouseDown", () => {
-        const circleSlider = shallow(<CircleSlider {...this.props} />);
-        const accuracy = 0.00001;
-        circleSlider.simulate("mousedown", {
-            preventDefault: () => {},
-        });
-
-        expect(circleSlider.state("angle")).toEqual(0 - accuracy);
-        expect(circleSlider.state("currentStepValue")).toEqual(0);
-    });
-
-    it("circle slider current step value to be equals 5", () => {
-        const circleSlider = shallow(<CircleSlider {...this.props} />);
-        const instance = circleSlider.instance() as any;
-        instance.updateAngle(0.3125);
-
-        expect(circleSlider.state("currentStepValue")).toEqual(5);
+        simulateDrag({ clientX: 20, clientY: 20 });
+        expect(props.onChange).toHaveBeenCalledTimes(2);
     });
 
     it("should render a default circle slider", () => {
-        const circleSlider = shallow(<CircleSlider {...this.props} />);
-        expect(circleSlider).toMatchSnapshot();
+        const wrapper = shallow(<CircleSlider {...props} />);
+        expect(wrapper).toMatchSnapshot();
     });
 });

@@ -1,5 +1,5 @@
 {
-    "name": "react-circle-slider",
+    "name": "react-circle-slider-hooked",
     "version": "1.6.2",
     "description": "Circle Slider UI component for React",
     "main": "./lib/index.js",
@@ -24,6 +24,9 @@
         "circular-slider"
     ],
     "author": "Morozov Dmitry <dimemorozovy@yandex.ru>",
+    "contributors": [
+        "Bernd Hacker <hacker.bernd@gmail.com"
+    ],
     "license": "MIT",
     "devDependencies": {
         "@babel/core": "^7.2.2",
@@ -37,14 +40,15 @@
         "@types/react-syntax-highlighter": "0.0.6",
         "awesome-typescript-loader": "^5.2.1",
         "babel-loader": "^8.0.5",
-        "enzyme": "^3.5.0",
-        "enzyme-adapter-react-16": "^1.2.0",
+        "enzyme": "^3.9.0",
+        "enzyme-adapter-react-16": "^1.11.2",
         "enzyme-to-json": "^3.3.4",
-        "jest": "^23.5.0",
+        "jest": "^23.6.0",
         "parcel-bundler": "^1.9.7",
         "prettier": "^1.14.2",
         "react-addons-test-utils": "^15.5.1",
         "react-syntax-highlighter": "^9.0.1",
+        "react-test-renderer": "^16.8.4",
         "rimraf": "^2.6.2",
         "sinon": "^6.1.5",
         "source-map-loader": "^0.2.4",
