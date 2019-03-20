@@ -1,13 +1,12 @@
 const path = require("path");
-const webpack = require("webpack");
 
 module.exports = {
-    entry: path.resolve(__dirname, "src/index.ts"),
+    entry: "./src/index.ts",
     output: {
         path: path.resolve(__dirname, "./lib"),
-        filename: "index.js",
-        library: "",
-        libraryTarget: "commonjs",
+        filename: "ReactCircleSliderHooked.js",
+        library: "ReactCircleSliderHooked",
+        libraryTarget: "umd",
     },
     resolve: {
         extensions: [".js", ".jsx", ".json", ".ts", ".tsx"],
@@ -16,8 +15,19 @@ module.exports = {
         rules: [
             {
                 test: /\.(ts|tsx)$/,
-                loader: ["babel-loader", "ts-loader"],
+                exclude: /node_modules/,
+                use: {
+                    loader: "babel-loader",
+                },
             },
         ],
+    },
+    externals: {
+        react: {
+            root: "React",
+            commonjs: "react",
+            commonjs2: "react",
+            amd: "react",
+        },
     },
 };

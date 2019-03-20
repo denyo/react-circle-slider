@@ -2,39 +2,39 @@
 
 exports[`circle slider should render a default circle slider 1`] = `
 <svg
-  height="180px"
+  height={100}
   onMouseDown={[Function]}
   onTouchStart={[Function]}
   style={
     Object {
       "boxSizing": "border-box",
       "padding": "5px",
+      "touchAction": "none",
     }
   }
-  viewBox="0 0 180 180"
-  width="180px"
+  viewBox="0 0 100 100"
+  width={100}
 >
   <g>
     <circle
-      cx={90}
-      cy={90}
-      r={70}
+      cx={50}
+      cy={50}
+      r={30}
       style={
         Object {
           "fill": "none",
-          "stroke": "#e9eaee",
+          "stroke": "#EDEDED",
           "strokeWidth": 5,
         }
       }
     />
     <path
-      d="M90 160 A 70 70 0 0 1 90.0007 159.99999999649998"
+      d="M 50 10 A 40 40 0 0 0 50 10 L 50 50 Z M 50 30 A 20 20 0 0 0 50 30 L 50 50 Z"
       style={
         Object {
-          "fill": "none",
-          "stroke": "#007aff",
-          "strokeLinecap": "round",
-          "strokeWidth": 20,
+          "fill": "#ADA1FB",
+          "fillRule": "evenodd",
+          "stroke": "none",
         }
       }
     />
@@ -64,14 +64,14 @@ exports[`circle slider should render a default circle slider 1`] = `
       </feMerge>
     </filter>
     <circle
-      cx={90.0007}
-      cy={159.99999999649998}
+      cx={50}
+      cy={20}
       filter="url(#dropShadow)"
       r={20}
       style={
         Object {
           "cursor": "pointer",
-          "fill": "#fff",
+          "fill": "#ADA1FB",
         }
       }
     />
