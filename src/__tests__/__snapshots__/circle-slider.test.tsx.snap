@@ -8,73 +8,70 @@ exports[`circle slider should render a default circle slider 1`] = `
   style={
     Object {
       "boxSizing": "border-box",
-      "padding": "5px",
       "touchAction": "none",
     }
   }
   viewBox="0 0 100 100"
   width={100}
 >
-  <g>
-    <circle
-      cx={50}
-      cy={50}
-      r={30}
-      style={
-        Object {
-          "fill": "none",
-          "stroke": "#EDEDED",
-          "strokeWidth": 5,
-        }
+  <circle
+    cx={50}
+    cy={50}
+    r={30}
+    style={
+      Object {
+        "fill": "none",
+        "stroke": "#EDEDED",
+        "strokeWidth": 5,
       }
-    />
-    <path
-      d="M 50 10 A 40 40 0 0 0 50 10 L 50 50 Z M 50 30 A 20 20 0 0 0 50 30 L 50 50 Z"
-      style={
-        Object {
-          "fill": "#ADA1FB",
-          "fillRule": "evenodd",
-          "stroke": "none",
-        }
+    }
+  />
+  <path
+    d="M 50 15 A 35 35 0 0 0 50 15 L 50 50 Z M 50 25 A 25 25 0 0 0 50 25 L 50 50 Z"
+    style={
+      Object {
+        "fill": "#ADA1FB",
+        "fillRule": "evenodd",
+        "stroke": "none",
       }
+    }
+  />
+  <filter
+    filterUnits="userSpaceOnUse"
+    id="dropShadow"
+  >
+    <feGaussianBlur
+      in="SourceAlpha"
+      stdDeviation="3"
     />
-    <filter
-      filterUnits="userSpaceOnUse"
-      id="dropShadow"
-    >
-      <feGaussianBlur
-        in="SourceAlpha"
-        stdDeviation="3"
+    <feOffset
+      dx="2"
+      dy="2"
+    />
+    <feComponentTransfer>
+      <feFuncA
+        slope="0.3"
+        type="linear"
       />
-      <feOffset
-        dx="2"
-        dy="2"
+    </feComponentTransfer>
+    <feMerge>
+      <feMergeNode />
+      <feMergeNode
+        in="SourceGraphic"
       />
-      <feComponentTransfer>
-        <feFuncA
-          slope="0.3"
-          type="linear"
-        />
-      </feComponentTransfer>
-      <feMerge>
-        <feMergeNode />
-        <feMergeNode
-          in="SourceGraphic"
-        />
-      </feMerge>
-    </filter>
-    <circle
-      cx={50}
-      cy={20}
-      filter="url(#dropShadow)"
-      r={20}
-      style={
-        Object {
-          "cursor": "pointer",
-          "fill": "#ADA1FB",
-        }
+    </feMerge>
+  </filter>
+  <circle
+    cx={50}
+    cy={20}
+    filter="url(#dropShadow)"
+    r={10}
+    style={
+      Object {
+        "cursor": "pointer",
+        "fill": "#ADA1FB",
       }
-    />
-  </g>
+    }
+  />
 </svg>
 `;
