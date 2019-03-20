@@ -11,8 +11,6 @@ type Props = {
     circleColor?: string;
     progressWidth?: number;
     progressColor?: string;
-    gradientColorFrom?: string;
-    gradientColorTo?: string;
     knobColor?: string;
     knobRadius?: number;
     disabled?: boolean;
@@ -36,12 +34,10 @@ const CircleSlider: React.FC<Props> = ({
     max = 100,
     circleWidth = 5,
     circleColor = "#e9eaee",
-    progressWidth = 20,
+    progressWidth = 10,
     progressColor = "#007aff",
-    gradientColorFrom,
-    gradientColorTo,
-    knobColor = "#fff",
-    knobRadius = 20,
+    knobColor = "#e9eaee",
+    knobRadius = 10,
     disabled = false,
     shadow = true,
     showTooltip = false,
@@ -140,9 +136,9 @@ const CircleSlider: React.FC<Props> = ({
         svgRef.current!.removeEventListener("touchend", handleTouchUp);
     };
 
-    const offset = shadow ? "5px" : "0px";
     const center = size / 2;
-    const radius = center - Math.max(circleWidth, progressWidth, knobRadius * 2) / 2;
+    // if there is a shadow we need to draw a bit smaller to not cut if off
+    const radius = center - Math.max(circleWidth, progressWidth, knobRadius * 2) / 2 - (shadow ? 10 : 0);
     const progressPath = buildPath({
         cx: center,
         cy: center,
@@ -152,88 +148,79 @@ const CircleSlider: React.FC<Props> = ({
         thickness: progressWidth,
     });
     const knobCenter = polarToCartesian(center, center, radius, valueToAngle());
-    const isAllGradientColorsAvailable = gradientColorFrom && gradientColorTo;
 
     return (
         <svg
             ref={svgRef}
             className={className}
-            width={size}
             height={size}
+            width={size}
             viewBox={`0 0 ${size} ${size}`}
             onMouseDown={disabled ? undefined : handleMouseDown}
             onTouchStart={disabled ? undefined : handleTouchStart}
             style={{
                 boxSizing: "border-box",
-                padding: offset,
                 touchAction: "none",
             }}
         >
-            <g>
-                <circle
-                    style={{
-                        strokeWidth: circleWidth,
-                        stroke: circleColor,
-                        fill: "none",
-                    }}
-                    r={radius}
-                    cx={center}
-                    cy={center}
-                />
-                {isAllGradientColorsAvailable && (
-                    <defs>
-                        <linearGradient id="gradient" x1="0" x2="0" y1="0" y2="1">
-                            <stop offset="0%" stopColor={gradientColorFrom} />
-                            <stop offset="100%" stopColor={gradientColorTo} />
-                        </linearGradient>
-                    </defs>
-                )}
-                <path
-                    style={{
-                        fill: isAllGradientColorsAvailable ? "url(#gradient)" : progressColor,
-                        fillRule: "evenodd",
-                        stroke: "none",
-                    }}
-                    d={progressPath}
-                />
-                {shadow && (
-                    <filter id="dropShadow" filterUnits="userSpaceOnUse">
-                        <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
-                        <feOffset dx="2" dy="2" />
-                        <feComponentTransfer>
-                            <feFuncA type="linear" slope="0.3" />
-                        </feComponentTransfer>
-                        <feMerge>
-                            <feMergeNode />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
-                )}
-                <circle
-                    style={{
-                        cursor: disabled ? "not-allowed" : "pointer",
-                        fill: knobColor,
-                    }}
-                    filter={shadow ? "url(#dropShadow)" : "none"}
-                    r={knobRadius}
-                    cx={knobCenter.x}
-                    cy={knobCenter.y}
-                />
-                {showTooltip && (
-                    <text
-                        x={size / 2}
-                        y={size / 2 + tooltipSize / 3}
-                        textAnchor="middle"
-                        fontSize={tooltipSize}
-                        fontFamily="Arial"
-                        fill={tooltipColor}
-                    >
-                        {valuePrefix}
-                        {formatValue()}
-                        {valueSuffix}
-                    </text>
-                )}
-            </g>
+            <circle
+                style={{
+                    fill: "none",
+                    stroke: circleColor,
+                    strokeWidth: circleWidth,
+                }}
+                r={radius}
+                cx={center}
+                cy={center}
+            />
+
+            <path
+                style={{
+                    fill: progressColor,
+                    fillRule: "evenodd",
+                    stroke: "none",
+                }}
+                d={progressPath}
+            />
+
+            {shadow && (
+                <filter id="dropShadow" filterUnits="userSpaceOnUse">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+                    <feOffset dx="2" dy="2" />
+                    <feComponentTransfer>
+                        <feFuncA type="linear" slope="0.3" />
+                    </feComponentTransfer>
+                    <feMerge>
+                        <feMergeNode />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+            )}
+            <circle
+                style={{
+                    cursor: disabled ? "not-allowed" : "pointer",
+                    fill: knobColor,
+                }}
+                filter={shadow ? "url(#dropShadow)" : "none"}
+                r={knobRadius}
+                cx={knobCenter.x}
+                cy={knobCenter.y}
+            />
+
+            {showTooltip && (
+                <text
+                    x={size / 2}
+                    y={size / 2 + tooltipSize / 3}
+                    textAnchor="middle"
+                    fontSize={tooltipSize}
+                    fontFamily="Arial"
+                    fill={tooltipColor}
+                >
+                    {valuePrefix}
+                    {formatValue()}
+                    {valueSuffix}
+                </text>
+            )}
         </svg>
     );
 };
