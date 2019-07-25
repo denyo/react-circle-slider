@@ -1,4 +1,4 @@
-# 🕹️ react-circle-slider
+# 🕹️ react-circle-slider-hooked
 
 Circle Slider Component for React.js
 
